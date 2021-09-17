@@ -77,7 +77,7 @@ static inline int find_best_encoding(const int16_t * shoco_restrict indices, uns
   return -1;
 }
 
-size_t shoco_compress(const char * const shoco_restrict original, size_t strlen, char * const shoco_restrict out, size_t bufsize) {
+size_t shoco_compress_mem(const char * const shoco_restrict original, const size_t strlen, char * const shoco_restrict out, const size_t bufsize, int term_at_zero) {
   char *o = out;
   char * const out_end = out + bufsize;
   const char *in = original;
@@ -91,7 +91,9 @@ size_t shoco_compress(const char * const shoco_restrict original, size_t strlen,
   unsigned int rest;
   const char * const in_end = original + strlen;
 
-  while ((*in != '\0')) {
+  term_at_zero |= 0 == strlen;
+
+  while ((!term_at_zero || *in != '\0')) {
     if (strlen && (in == in_end))
       break;
 
@@ -143,7 +145,7 @@ size_t shoco_compress(const char * const shoco_restrict original, size_t strlen,
       in += packs[pack_n].bytes_unpacked;
     } else {
 last_resort:
-      if (*in & 0x80) {
+      if (*in & 0x80 || *in == '\0') {
         // non-ascii case
         if (o + 2 > out_end)
           return bufsize + 1;
@@ -161,7 +163,7 @@ last_resort:
   return o - out;
 }
 
-size_t shoco_decompress(const char * const shoco_restrict original, size_t complen, char * const shoco_restrict out, size_t bufsize) {
+size_t shoco_decompress_mem(const char * const shoco_restrict original, const size_t complen, char * const shoco_restrict out, const size_t bufsize, const int append_nil) {
   char *o = out;
   char * const out_end = out + bufsize;
   const char *in = original;
@@ -218,7 +220,7 @@ size_t shoco_decompress(const char * const shoco_restrict original, size_t compl
   }
 
   // append a 0-terminator if it fits
-  if (o < out_end)
+  if (o < out_end && append_nil)
     *o = '\0';
 
   return o - out;

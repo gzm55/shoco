@@ -63,6 +63,37 @@ int main() {
   ret = shoco_compress("ä", 0, buf_1, 1); // this assumes that 'ä' is not in the frequent chars table
   assert(ret == 2);
 
+  buf_4[0] = 'b';
+  ret = shoco_compress_mem("", 0, buf_4, 4, 0); // zero strlen will force stop at null byte
+  assert(ret == 0);
+  assert(buf_4[0] == 'b');
+
+  buf_4[2] = 'b';
+  ret = shoco_compress_mem("", 1, buf_4, 4, 0); // encode null byte
+  assert(ret == 2);
+  assert(buf_4[0] == '\0');
+  assert(buf_4[1] == '\0');
+  assert(buf_4[2] == 'b');
+
+  buf_4[3] = 'b';
+  ret = shoco_compress_mem("a", 2, buf_4, 4, 0); // encode null byte
+  assert(ret == 3);
+  assert(buf_4[0] == 'a');
+  assert(buf_4[1] == '\0');
+  assert(buf_4[2] == '\0');
+  assert(buf_4[3] == 'b');
+
+  buf_large[6] = 'z';
+  ret = shoco_compress_mem("\0a\0b", 4, buf_large, sizeof buf_large, 0); // encode null byte
+  assert(ret == 6);
+  assert(buf_large[0] == '\0');
+  assert(buf_large[1] == '\0');
+  assert(buf_large[2] == 'a');
+  assert(buf_large[3] == '\0');
+  assert(buf_large[4] == '\0');
+  assert(buf_large[5] == 'b');
+  assert(buf_large[6] == 'z');
+
   
   //test decompression
   char compressed_large[4096];
@@ -109,6 +140,31 @@ int main() {
 
   ret = shoco_decompress("\xf8""ab", 3, buf_large, 4096);
   assert(ret == 0);
+
+  char compressed_mem[256];
+  comp_len = shoco_compress_mem("\0a\0b", 4, compressed_mem, sizeof compressed_mem, 0);
+
+  buf_large[4] = 'x';
+  ret = shoco_decompress(compressed_mem, comp_len, buf_large, sizeof buf_large); // internal null byte
+  assert(ret == 4);
+  assert(buf_large[0] == '\0');
+  assert(buf_large[1] == 'a');
+  assert(buf_large[2] == '\0');
+  assert(buf_large[3] == 'b');
+  assert(buf_large[4] == '\0');
+
+  buf_large[0] = 'z';
+  buf_large[1] = 'z';
+  buf_large[2] = 'z';
+  buf_large[3] = 'z';
+  buf_large[4] = 'z';
+  ret = shoco_decompress_mem(compressed_mem, comp_len, buf_large, sizeof buf_large, 0); // avoid tail null byte
+  assert(ret == 4);
+  assert(buf_large[0] == '\0');
+  assert(buf_large[1] == 'a');
+  assert(buf_large[2] == '\0');
+  assert(buf_large[3] == 'b');
+  assert(buf_large[4] == 'z');
 
   puts("All tests passed.");
   return 0;
