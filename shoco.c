@@ -145,7 +145,7 @@ size_t shoco_compress_mem(const char * const shoco_restrict original, const size
       in += packs[pack_n].bytes_unpacked;
     } else {
 last_resort:
-      if (*in & 0x80 || *in == '\0') {
+      if (*in <= 0) {
         // non-ascii case
         if (o + 2 > out_end)
           return bufsize + 1;
