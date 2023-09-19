@@ -51,7 +51,11 @@ union Code {
 };
 
 #ifdef HAVE_SSE2
+#if defined(_MSC_VER) || defined(__clang__)
 static inline int check_indices(_ALIGNED const void * shoco_restrict indices, int pack_n) {
+#else
+static inline int check_indices(const void * _ALIGNED shoco_restrict indices, int pack_n) {
+#endif
   __m128i zero = _mm_setzero_si128();
   __m128i indis = _mm_load_si128 ((__m128i *)indices);
   __m128i masks = _mm_load_si128 ((__m128i *)packs[pack_n].masks);

@@ -1,4 +1,5 @@
-FLAGS=$(CFLAGS) -std=c99 -O3 -Wall
+#FLAGS=$(CFLAGS) -std=c99 -O3 -Wall
+FLAGS=$(CFLAGS) -O3 -Wall
 SOURCES=shoco.c
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=shoco.h shoco_model.h
@@ -26,14 +27,14 @@ shoco_model.h: $(TABLES_DIR)/words_en.h
 .PHONY: models
 models: $(TABLES)
 
-$(TABLES_DIR)/text_en.h: $(TRAINING_DATA) $(GENERATOR)
-	python $(GENERATOR) $(TRAINING_DATA) -o $@
+#$(TABLES_DIR)/text_en.h: $(TRAINING_DATA) $(GENERATOR)
+	#python3 $(GENERATOR) $(TRAINING_DATA) -o $@
 
-$(TABLES_DIR)/words_en.h: $(TRAINING_DATA) $(GENERATOR)
-	python $(GENERATOR) --split=whitespace --strip=punctuation $(TRAINING_DATA) -o $@
+#$(TABLES_DIR)/words_en.h: $(TRAINING_DATA) $(GENERATOR)
+	#python3 $(GENERATOR) --split=whitespace --strip=punctuation $(TRAINING_DATA) -o $@
 
-$(TABLES_DIR)/dictionary.h: /usr/share/dict/words $(GENERATOR)
-	python $(GENERATOR) $< -o $@
+#$(TABLES_DIR)/dictionary.h: /usr/share/dict/words $(GENERATOR)
+	#python3 $(GENERATOR) $< -o $@
 
 # Warning: This is *slow*! Use pypy when possible
 $(TABLES_DIR)/filepaths.h: $(GENERATOR)
